@@ -3,11 +3,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_redis import FlaskRedis
 
-#from flask_cors import CORS
-
-#from flaskr import db
-from flask_mysqldb import MySQL
-
 
 redis_client = FlaskRedis()
 # create the extension
