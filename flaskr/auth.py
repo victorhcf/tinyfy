@@ -99,20 +99,8 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        # db = get_db()
         error = None
-        # user = db.execute(
-        #     "SELECT * FROM user WHERE username = ?", (username,)
-        # ).fetchone()
-
-        # User.
         user = User.query.filter_by(username=username).first()
-        print('user.. username... ', username)
-        print('user.. USER... ', user)
-        print('\nuser.. USER... ', type(user))
-        print('\n\nuser.. USER... ', dir(user))
-
-        print('\n\nuser.. USER PASS... ', user.password)
 
         if user is None:
             error = "Incorrect username."
