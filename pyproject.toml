@@ -1,0 +1,36 @@
+[project]
+name = "flaskr"
+version = "1.0.0"
+description = "Projeto Encurtador de URLs"
+readme = "README.rst"
+license = {text = "BSD-3-Clause"}
+maintainers = [{name = "Victor Fernandes", email = "victorhcf@gmail.com"}]
+dependencies = [
+    "flask",
+]
+
+[project.urls]
+Documentation = "https://github.com/victorhcf/tinyfy"
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "flaskr"
+
+[tool.flit.sdist]
+include = [
+    "tests/",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+branch = true
+source = ["flaskr", "tests"]

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}Your shortened URL{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<p>Copy the shortened link and share it in messages, texts, posts, websites and other locations.</p>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Total Users</th>
+            <th scope="col">Total urls</th>
+            <th scope="col">Total redirects</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ stats.total_users }}</td>
+            <td>{{ stats['total_urls'] }}</td>
+            <td>{{ stats['total_views'] }}</td>
+        </tr>
+
+
+    </tbody>
+
+</table>
+
+{% endblock %}

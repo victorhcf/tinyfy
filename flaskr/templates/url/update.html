@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}New URL{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% if url.id %}
+    <input name="id" id="urlid" type="hidden" value="{{url.id}}">
+    {% endif %}
+    <label for="url">URL </label>
+    <input name="url" id="url" value="{{ request.form['url'] or url['url_original'] }}" required>
+
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="enabled" value="" id="flexCheckChecked" {% if url.enabled
+            %}checked{%endif%}>
+        <label class="form-check-label" for="flexCheckChecked">
+            Ativo
+        </label>
+    </div>
+
+
+    <input type="submit" value="Save">
+</form>
+{% endblock %}

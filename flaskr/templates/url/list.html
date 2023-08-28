@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}My URLs{% endblock %}</h1>
+{% if g.user %}
+<a class="action" href="{{ url_for('url.generate') }}">New</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Code</th>
+            <th scope="col">Original</th>
+            <th scope="col">Created</th>
+            <th scope="col">User</th>
+            <th scope="col">Enabledlicks</th>
+            <th scope="col">Clicks</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for _url in urls %}
+        <tr>
+            <td><a href="/url/{{ _url['id'] }}">{{ _url['id'] }}</a></td>
+            <td><a target="_blank" href="http://127.0.0.1:5000/{{ _url['code'] }}">{{ _url['code'] }}</a></td>
+            <td>{{ _url['url_original'] }}</td>
+            <td>{{ _url['created'] }}</td>
+            <td>{{ _url['user'] }}</td>
+            <td>{{ _url['enabled'] }}</td>
+            <td>#</td>
+            <td>
+                <div class="btn-group" role="group">
+                    <a href="{{ url_for('url.update', id=_url['id']) }}" class="btn btn-warning btn-sm" type="button">
+                        Update
+                    </a>
+                    <a href="{{ url_for('url.delete', id=_url['id']) }}" class="btn btn-danger btn-sm" type="button">
+                        Delete
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+
+
+    </tbody>
+
+</table>
+
+
+
+{% endblock %}

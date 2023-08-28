@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}Your shortened URL{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<p>Copy the shortened link and share it in messages, texts, posts, websites and other locations.</p>
+
+<p>
+    <input type="text" id="myInput" value="http://localhost:5000/{{ newurl['code'] }}">
+    <button onclick="myFunction()" class="btn btn-success">Copy text</button>
+</p>
+<p>
+    Long Url: <a href="{{newurl.url_original}}">{{newurl.url_original}}</a>
+</p>
+<p>
+    Total views: {{newurl.total_views}}
+</p>
+
+<a class="btn btn-secondary btn-sm" href="{{ url_for('index') }}">
+    Shortener another URL
+</a>
+
+<script>
+
+    function myFunction() {
+        /* Get the text field */
+        var copyText = document.getElementById("myInput");
+
+        /* Select the text field */
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+        /* Copy the text inside the text field */
+        navigator.clipboard.writeText(copyText.value);
+
+        /* Alert the copied text */
+        alert("Copied the text: " + copyText.value);
+    }
+</script>
+{% endblock %}
