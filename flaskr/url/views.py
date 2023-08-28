@@ -8,13 +8,15 @@ from flask import render_template
 from flask import request
 from flask import url_for
 from flask import flash
+from flask import current_app
+from sqlalchemy import create_engine
+from sqlalchemy import insert
+from sqlalchemy import desc
 from werkzeug.exceptions import abort
 from flask_cors import cross_origin
-from sqlalchemy import desc
 
 from flaskr.auth import login_required
-from flaskr.db import get_db
-from flaskr.models import Url, User
+from flaskr.models import Url, User, Stats
 from .url_service import UrlService
 
 from flaskr import database
@@ -39,15 +41,13 @@ def my_urls():
     return render_template("url/list.html", urls=urls)
     
 
+from sqlalchemy import func
 
 @bp.route("/url/<int:id>")
 def view_url(id):
     """Show all the posts, most recent first."""
     url = Url.query.get(id)
-    db = get_db()
-    total_views = db.execute(
-        "SELECT count(*) FROM stats WHERE url_id= ?", (url.id,)
-    ).fetchone()[0]
+    total_views = database.session.query(Stats).filter(Stats.url_id==id).count()
     url = url.to_dict()
     url['total_views'] = total_views
     if 'Content-Type' in request.headers and request.headers['Content-Type'] == 'application/json':
@@ -55,22 +55,22 @@ def view_url(id):
     return render_template("url/view.html", newurl=url)
     
 
-@bp.route("/list", methods=['GET'])
-@cross_origin()
-def list_urls():
-    """Show all the posts, most recent first."""
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute(
-        "SELECT id, url_original, url_secret, code, created "
-        " FROM urls "
-        " ORDER BY created DESC"
-    )
-    urls = cursor.fetchall()
+# @bp.route("/list", methods=['GET'])
+# @cross_origin()
+# def list_urls():
+#     """Show all the posts, most recent first."""
+#     db = get_db()
+#     cursor = db.cursor()
+#     cursor.execute(
+#         "SELECT id, url_original, url_secret, code, created "
+#         " FROM urls "
+#         " ORDER BY created DESC"
+#     )
+#     urls = cursor.fetchall()
         
-    cursor.close()
+#     cursor.close()
 
-    return jsonify(urls)
+#     return jsonify(urls)
   
 
 @bp.route("/generate", methods=['GET', 'POST'])
@@ -88,7 +88,7 @@ def generate():
 
         url = Url(url_original=url_original)
         UrlService.generate_code(url=url)
-        
+
         if g and g.user:
             user_id = g.user['id']
             user = User.query.get(user_id)
@@ -104,27 +104,29 @@ def generate():
 
 
 
-
 @bp.route("/<url_code>", methods=['get'])
 def redirect_url(url_code):
-    db = get_db()
-    print("sql.. ", url_code)
-    sql = "SELECT url_original FROM urls WHERE code = ?"
-    cursor = db.cursor()
-    cursor.execute(sql, (url_code,))
-    row = cursor.fetchone()
-    print("sql.. ", sql)
-    print("sql.. ", row)
-    url = None
     url = Url.query.filter_by(code=url_code).first()
-    if row:
-        url_redirect = row[0]
-        db.execute(
-            "INSERT INTO stats (url_id, code, url_original, ip) VALUES (?, ?, ?, ?)",
-            (url.id, url.code, url.url_original, request.remote_addr),
-        )
-        db.commit()
+    print('URL ... ', url)
+    if not url.enabled:
+        if 'Content-Type' in request.headers and request.headers['Content-Type'] == 'application/json':
+            return jsonify({'meessage': 'Url not found'}), 404
+        else:
+            flash("URL não encontrada")
+            return redirect(url_for("index"))
+    
+    if url:
+        url_redirect = url.url_original
+        sql = "INSERT INTO stats (url_id, code, url_original, ip) VALUES (:url_id, :code, :url_original, :ip)"
 
+        stmt = insert(Stats).values(url_id=url.id, code=url.code, url_original=url.url_original, ip=request.remote_addr)
+        
+        engine = create_engine(current_app.config['SQLALCHEMY_DATABASE_URI'])
+        with engine.connect() as conn:
+            conn.execute(stmt)
+            conn.commit()
+
+        print('url_redirect.. ', url_redirect)
         return redirect(url_redirect, code=302)
     else:
         flash("URL não encontrada")
@@ -147,9 +149,8 @@ def delete(id):
         url = Url.query.get(id)
 
         if url.user and url.user.id == g.user['id']:
-            db = get_db()
-            db.execute("DELETE FROM urls WHERE id = ?", (id,))
-            db.commit()
+            database.session.delete(url)
+            database.session.commit()
         else:
             message = "Somente o dono pode deletar."
             flash(message)
@@ -193,11 +194,20 @@ def update(id):
 def stats():
     """Show all stats of the usage."""
 
-    db = get_db()
-    total_views = db.execute("SELECT count(*) FROM stats").fetchone()[0]
-    total_urls = db.execute("SELECT count(*) FROM urls").fetchone()[0]
-    total_users = db.execute("SELECT count(*) FROM user").fetchone()[0]
-    
+    # db = get_db()
+    # total_views = db.execute("SELECT count(*) FROM stats").fetchone()[0]
+    # total_urls = db.execute("SELECT count(*) FROM urls").fetchone()[0]
+    # total_users = db.execute("SELECT count(*) FROM user").fetchone()[0]
+
+    total_views = database.session.query(Stats).count()
+    total_urls = database.session.query(Url).count()
+    total_users = database.session.query(User).count()
+    print('COUNT.. ', total_views)
+    # engine = create_engine(current_app.config['SQLALCHEMY_DATABASE_URI'])
+    # with engine.connect() as conn:
+    #     conn.execute(stmt)
+    #     conn.commit()
+
     stats = {
         'total_users': total_users,
         'total_urls': total_urls,

@@ -17,8 +17,7 @@
             <th scope="col">Original</th>
             <th scope="col">Created</th>
             <th scope="col">User</th>
-            <th scope="col">Enabledlicks</th>
-            <th scope="col">Clicks</th>
+            <th scope="col">Enabled</th>
             <th scope="col"></th>
         </tr>
     </thead>
@@ -31,7 +30,6 @@
             <td>{{ _url['created'] }}</td>
             <td>{{ _url['user'] }}</td>
             <td>{{ _url['enabled'] }}</td>
-            <td>#</td>
             <td>
                 <div class="btn-group" role="group">
                     <a href="{{ url_for('url.update', id=_url['id']) }}" class="btn btn-warning btn-sm" type="button">

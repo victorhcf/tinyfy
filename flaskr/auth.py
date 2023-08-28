@@ -1,3 +1,4 @@
+import traceback
 import functools
 
 from flask import Blueprint
@@ -11,8 +12,8 @@ from flask import url_for
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 
-from flaskr.db import get_db
 from flaskr import database
+from .models import User
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -40,12 +41,9 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = (
-            get_db().execute("SELECT * FROM user WHERE id = ?", (user_id,)).fetchone()
+            User.query.get(user_id).to_dict()
         )
 
-from .models import User
-
-import traceback
 
 @bp.route("/register", methods=("GET", "POST"))
 def register():
@@ -101,21 +99,30 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        db = get_db()
+        # db = get_db()
         error = None
-        user = db.execute(
-            "SELECT * FROM user WHERE username = ?", (username,)
-        ).fetchone()
+        # user = db.execute(
+        #     "SELECT * FROM user WHERE username = ?", (username,)
+        # ).fetchone()
+
+        # User.
+        user = User.query.filter_by(username=username).first()
+        print('user.. username... ', username)
+        print('user.. USER... ', user)
+        print('\nuser.. USER... ', type(user))
+        print('\n\nuser.. USER... ', dir(user))
+
+        print('\n\nuser.. USER PASS... ', user.password)
 
         if user is None:
             error = "Incorrect username."
-        elif not check_password_hash(user["password"], password):
+        elif not check_password_hash(user.password, password):
             error = "Incorrect password."
 
         if error is None:
             # store the user id in a new session and return to the index
             session.clear()
-            session["user_id"] = user["id"]
+            session["user_id"] = user.id
             return redirect(url_for("index"))
 
         flash(error)
