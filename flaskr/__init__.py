@@ -6,12 +6,13 @@ from flask_redis import FlaskRedis
 #from flask_cors import CORS
 
 #from flaskr import db
-
+from flask_mysqldb import MySQL
 
 
 redis_client = FlaskRedis()
 # create the extension
 database = SQLAlchemy()
+# mysql = MySQL()
 
 def create_app(test_config=None):
 
@@ -20,7 +21,9 @@ def create_app(test_config=None):
 
     """Create and configure an instance of the Flask application."""
     app = Flask(__name__, instance_relative_config=True)
-    database_path = os.path.join(app.instance_path, "flaskr.sqlite")
+    #database_path = os.path.join(app.instance_path, "flaskr.sqlite")
+    database_path = 'mysql+pymysql://silk:iamsilk@44.202.64.68:3306/tinyfy'
+
     app.config.from_mapping(
         # a default secret that should be overridden by instance config
         SECRET_KEY="dev",
@@ -34,18 +37,23 @@ def create_app(test_config=None):
     app.config['REDIS_DB'] = 0
     app.config['CORS_HEADERS'] = 'Content-Type'
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///"+database_path
+    # app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///"+database_path
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_path
+    app.config['MYSQL_HOST'] = '44.202.64.68'
+    app.config['MYSQL_USER'] = 'silk'
+    app.config['MYSQL_PASSWORD'] = 'iamsilk'
+    app.config['MYSQL_DB'] = 'tinyfy'
+    
 
     #CORS(app)
     database.init_app(app)
     redis_client.init_app(app)
+    # mysql.init_app(app)
 
     if test_config is None:
-        print('INSIDE IF TEST')
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile("config.py", silent=True)
     else:
-        print('INSIDE IF ELSE')
         # load the test config if passed in
         app.config.update(test_config)
 
