@@ -108,7 +108,7 @@ def generate():
 def redirect_url(url_code):
     url = Url.query.filter_by(code=url_code).first()
     print('URL ... ', url)
-    if not url.enabled:
+    if url and not url.enabled:
         if 'Content-Type' in request.headers and request.headers['Content-Type'] == 'application/json':
             return jsonify({'meessage': 'Url not found'}), 404
         else:
