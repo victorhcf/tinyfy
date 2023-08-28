@@ -1,10 +1,14 @@
-Tinyfe
+Tinyfy
 ======
 
 Esta é uma aplicação para gerar urls encurtadas.
 Está implementado uma interface web e também uma
 
-The basic blog app built in the Flask `tutorial`_.
+A implementação da solução desta aplição se dá a partir de um gerador de hash que usa como base um número de entrada que é único e controlado pela aplicação.
+Desta forma nos permite escalar horizontalmente os servidores de aplicação para suportar uma alta escala sem perder consistência.
+Este contador é controlado por um serviço REDIS que tem a funcionalidade de contador atomico necessário para que a solução funcione em alta escala.
+Com o contador único em mãos utilizamos a lib https://sqids.org/ para gerar o hash.
+
 
 .. _tutorial: https://github.com/victorhcf/tinyfy
 
