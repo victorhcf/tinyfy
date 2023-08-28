@@ -47,6 +47,15 @@ from sqlalchemy import func
 def view_url(id):
     """Show all the posts, most recent first."""
     url = Url.query.get(id)
+    if not url:
+        msg="ULR não encontrada."
+        if 'Content-Type' in request.headers and request.headers['Content-Type'] == 'application/json':
+            return jsonify({'message': url}), 404
+        else:
+            flash(msg, 'error')
+            return redirect(url_for("index")) 
+
+
     total_views = database.session.query(Stats).filter(Stats.url_id==id).count()
     url = url.to_dict()
     url['total_views'] = total_views
@@ -166,6 +175,15 @@ def delete(id):
 def update(id):
     """Update a url if the current user is the author."""
     url = Url.query.get(id)
+
+    if not url:
+        msg="ULR não encontrada."
+        if 'Content-Type' in request.headers and request.headers['Content-Type'] == 'application/json':
+            return jsonify({'message': url}), 404
+        else:
+            flash(msg, 'error')
+            return redirect(url_for("index")) 
+        
     if request.method == "GET":
         return render_template("url/update.html", url=url)
 
